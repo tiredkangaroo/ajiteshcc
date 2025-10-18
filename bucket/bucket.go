@@ -10,19 +10,16 @@ import (
 )
 
 type Object struct {
-	Key string `json:"key"`
-	// Etag           string            `json:"etag"`
-	// LastModified   time.Time         `json:"last_modified"`
-	// Size           int64             `json:"size"`
-	// HTTPMetadata   map[string]string `json:"http_metadata"`
-	// CustomMetadata any               `json:"custom_metadata"` // only got a response of {}
-	// StorageClass string `json:"storage_class"`
+	Name      string `json:"name"`       // object key
+	PublicURL string `json:"public_url"` // public URL of the object
 }
 
 type listAllObjectsInBucketResponse struct {
 	Success bool     `json:"success"`
 	Errors  []string `json:"errors"`
-	Result  []Object `json:"result"`
+	Result  []struct {
+		Key string `json:"key"`
+	} `json:"result"`
 }
 
 func ListAllObjectsInBucket(bucketName string) ([]Object, error) {
@@ -51,5 +48,14 @@ func ListAllObjectsInBucket(bucketName string) ([]Object, error) {
 	if !listResp.Success {
 		return nil, fmt.Errorf("list objects in bucket: %v", listResp.Errors)
 	}
-	return listResp.Result, nil
+	var objects []Object
+	pub_url := *env.DefaultEnv.R2_PHOTOS_BUCKET_PUBLIC_URL
+	for _, obj := range listResp.Result {
+		pub_url.Path = "/" + obj.Key // set the path to the object key
+		objects = append(objects, Object{
+			Name:      obj.Key,
+			PublicURL: pub_url.String(),
+		})
+	}
+	return objects, nil
 }
