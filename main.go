@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/tiredkangaroo/ajiteshcc/env"
 	"github.com/tiredkangaroo/ajiteshcc/gen/db"
+	"github.com/tiredkangaroo/ajiteshcc/server"
 )
 
 func main() {
@@ -19,8 +20,9 @@ func main() {
 	slog.Info("database connected successfully")
 
 	queries := db.New(conn)
-	if err := server(queries); err != nil {
-		slog.Error("server", "error", err)
+	srv := &server.Server{Queries: queries}
+	if err := srv.Run(); err != nil {
+		slog.Error("server run", "error", err)
 		return
 	}
 }
