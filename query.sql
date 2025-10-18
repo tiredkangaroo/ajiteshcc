@@ -7,7 +7,7 @@ SELECT p.*,
                    'comment', t.comment
                )
            ) FILTER (WHERE t.title IS NOT NULL), '[]'
-       ) AS tags
+       )::jsonb AS tags
 FROM photos p
 LEFT JOIN photo_tags pt ON p.id = pt.photo_id
 LEFT JOIN tags t ON pt.tag_title = t.title
@@ -22,7 +22,7 @@ SELECT p.*,
                    'comment', t.comment
                )
            ) FILTER (WHERE t.title IS NOT NULL), '[]'
-       ) AS tags
+       )::json AS tags
 FROM photos p
 LEFT JOIN photo_tags pt ON p.id = pt.photo_id
 LEFT JOIN tags t ON pt.tag_title = t.title
@@ -38,7 +38,7 @@ SELECT p.*,
                      'comment', t2.comment
                 )
               ) FILTER (WHERE t2.title IS NOT NULL), '[]'
-         ) AS tags
+         )::json AS tags
 FROM photos p
 LEFT JOIN photo_tags pt ON p.id = pt.photo_id
 LEFT JOIN tags t ON pt.tag_title = t.title
@@ -54,7 +54,7 @@ SELECT p.*,
                         'comment', t2.comment
                     )
                 ) FILTER (WHERE t2.title IS NOT NULL), '[]'
-            ) AS tags
+            )::json AS tags
 FROM photos p
 LEFT JOIN photo_tags pt ON p.id = pt.photo_id
 LEFT JOIN tags t ON pt.tag_title = t.title
@@ -70,8 +70,10 @@ LEFT JOIN photo_tags pt ON t.title = pt.tag_title
 GROUP BY t.title, t.comment;
 
 
--- name: AddPhoto :exec
-INSERT INTO photos (title, photo_url, comment, metadata) VALUES ($1, $2, $3, $4);
+-- name: AddPhoto :one
+INSERT INTO photos (title, photo_url, comment, metadata) 
+VALUES ($1, $2, $3, $4) 
+RETURNING id;
 
 -- name: CreateTag :exec
 INSERT INTO tags (title, comment) VALUES ($1, $2);
@@ -84,8 +86,7 @@ INSERT INTO photo_tags (photo_id, tag_title) VALUES ($1, $2);
 
 -- name: AddTagsToPhoto :exec
 INSERT INTO photo_tags (photo_id, tag_title)
-SELECT $1, unnest($2)
-ON CONFLICT DO NOTHING;
+SELECT $1, unnest($2::text[]);
 
 -- name: RemoveTagFromPhoto :exec
 DELETE FROM photo_tags WHERE photo_id = $1 AND tag_title = $2;

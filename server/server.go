@@ -3,12 +3,14 @@ package server
 import (
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/tiredkangaroo/ajiteshcc/env"
 	"github.com/tiredkangaroo/ajiteshcc/gen/db"
 )
 
 type Server struct {
+	Conn    *pgx.Conn
 	Queries *db.Queries
 }
 

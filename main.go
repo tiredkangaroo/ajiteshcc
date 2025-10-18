@@ -20,7 +20,7 @@ func main() {
 	slog.Info("database connected successfully")
 
 	queries := db.New(conn)
-	srv := &server.Server{Queries: queries}
+	srv := &server.Server{Conn: conn, Queries: queries}
 	if err := srv.Run(); err != nil {
 		slog.Error("server run", "error", err)
 		return

@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"strconv"
 
@@ -40,19 +39,36 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 		PhotoURL string         `json:"photo_url"`
 		Comment  string         `json:"comment" required:"false"`
 		Metadata map[string]any `json:"metadata" required:"false"`
+		Tags     []string       `json:"tags" required:"false"`
 	}) error {
-		metadata, err := json.Marshal(req.Metadata)
+		tx, err := s.Conn.Begin(c.Request().Context())
 		if err != nil {
-			slog.Error("marshal metadata", "error", err)
-			return c.String(400, "bad request: invalid metadata")
+			slog.Error("begin transaction", "error", err)
+			return c.String(500, "internal server error")
 		}
-		if err := s.Queries.AddPhoto(context.Background(), db.AddPhotoParams{
+		defer tx.Rollback(c.Request().Context())
+		queries := s.Queries.WithTx(tx)
+
+		photoID, err := queries.AddPhoto(c.Request().Context(), db.AddPhotoParams{
 			Title:    pgText(req.Title),
 			PhotoUrl: req.PhotoURL,
 			Comment:  pgText(req.Comment),
-			Metadata: metadata,
-		}); err != nil {
+			Metadata: req.Metadata,
+		})
+		if err != nil {
 			slog.Error("add photo", "error", err)
+			return c.String(500, "internal server error")
+		}
+		if err := queries.AddTagsToPhoto(context.Background(), db.AddTagsToPhotoParams{
+			PhotoID: photoID,
+			Column2: req.Tags,
+		}); err != nil {
+			slog.Error("add photo tags", "error", err)
+			return c.String(500, "internal server error")
+		}
+
+		if err := tx.Commit(c.Request().Context()); err != nil {
+			slog.Error("commit transaction", "error", err)
 			return c.String(500, "internal server error")
 		}
 		return c.NoContent(204)

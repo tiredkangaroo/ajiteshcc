@@ -3,7 +3,7 @@ CREATE TABLE photos (
     title TEXT,
     photo_url TEXT NOT NULL,
     comment TEXT,
-    metadata JSONB DEFAULT '{}'::jsonb
+    metadata JSONB NOT NULL DEFAULT '{}'::JSONB
 );
 
 CREATE TABLE tags (
