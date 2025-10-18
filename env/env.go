@@ -8,6 +8,9 @@ import (
 
 type Environment struct {
 	POSTGRES_CONNECTION_URI string
+	JWT_SECRET              []byte
+	TOTP_SECRET             string
+	DEBUG                   bool
 	ADDR                    string
 }
 
@@ -17,6 +20,9 @@ func init() {
 	godotenv.Load()
 	DefaultEnv = Environment{
 		POSTGRES_CONNECTION_URI: envRequire("POSTGRES_CONNECTION_URI"),
+		JWT_SECRET:              []byte(envRequire("JWT_SECRET")),
+		TOTP_SECRET:             envRequire("TOTP_SECRET"),
+		DEBUG:                   os.Getenv("DEBUG") == "true",
 		ADDR:                    envRequire("ADDR"),
 	}
 }

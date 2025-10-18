@@ -71,7 +71,7 @@ GROUP BY t.title, t.comment;
 
 
 -- name: AddPhoto :exec
-INSERT INTO photos (id, title, photo_url, comment, metadata) VALUES ($1, $2, $3, $4, $5);
+INSERT INTO photos (title, photo_url, comment, metadata) VALUES ($1, $2, $3, $4);
 
 -- name: CreateTag :exec
 INSERT INTO tags (title, comment) VALUES ($1, $2);
