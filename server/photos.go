@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"net/url"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/tiredkangaroo/ajiteshcc/bucket"
@@ -21,19 +20,17 @@ func (s *Server) getAllPhotos(c echo.Context) error {
 	return c.JSON(200, data)
 }
 
-func (s *Server) getPhotoByID(c echo.Context) error {
-	idStr := c.Param("id")
-	id, err := strconv.ParseInt(idStr, 10, 32)
-	if err != nil {
-		slog.Error("parse photo id", "error", err)
-		return c.String(400, "bad request: invalid photo id")
-	}
-	data, err := s.Queries.GetPhotoByIDWithTags(c.Request().Context(), int32(id))
-	if err != nil {
-		slog.Error("get photo by id", "error", err)
-		return c.String(500, "internal server error")
-	}
-	return c.JSON(200, data)
+func (s *Server) getPhotoByIDHandler() echo.HandlerFunc {
+	return handler(func(c echo.Context, req struct {
+		ID int32 `param:"id"`
+	}) error {
+		data, err := s.Queries.GetPhotoByIDWithTags(c.Request().Context(), req.ID)
+		if err != nil {
+			slog.Error("get photo by id", "error", err)
+			return c.String(500, "internal server error")
+		}
+		return c.JSON(200, data)
+	})
 }
 
 func (s *Server) addPhotoHandler() echo.HandlerFunc {
@@ -92,6 +89,39 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 
 		if err := tx.Commit(c.Request().Context()); err != nil {
 			slog.Error("commit transaction", "error", err)
+			return c.String(500, "internal server error")
+		}
+		return c.NoContent(204)
+	})
+}
+
+// PATCH /api/v1/photos/:id/tag/:title
+func (s *Server) addTagToPhotoHandler() echo.HandlerFunc {
+	return handler(func(c echo.Context, req struct {
+		PhotoID  int32  `param:"id"`
+		TagTitle string `param:"title"`
+	}) error {
+		if err := s.Queries.AddTagToPhoto(c.Request().Context(), db.AddTagToPhotoParams{
+			PhotoID:  req.PhotoID,
+			TagTitle: req.TagTitle,
+		}); err != nil {
+			slog.Error("add tag to photo", "error", err)
+			return c.String(500, "internal server error")
+		}
+		return c.NoContent(204)
+	})
+}
+
+func (s *Server) removeTagFromPhotoHandler() echo.HandlerFunc {
+	return handler(func(c echo.Context, req struct {
+		PhotoID  int32  `param:"id"`
+		TagTitle string `param:"title"`
+	}) error {
+		if err := s.Queries.RemoveTagFromPhoto(c.Request().Context(), db.RemoveTagFromPhotoParams{
+			PhotoID:  req.PhotoID,
+			TagTitle: req.TagTitle,
+		}); err != nil {
+			slog.Error("remove tag from photo", "error", err)
 			return c.String(500, "internal server error")
 		}
 		return c.NoContent(204)

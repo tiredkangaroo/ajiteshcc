@@ -81,3 +81,37 @@ func (s *Server) addPostHandler() echo.HandlerFunc {
 		return c.NoContent(http.StatusCreated)
 	})
 }
+
+func (s *Server) addTagToPostHandler() echo.HandlerFunc {
+	return handler(func(c echo.Context, req struct {
+		Slug  string `param:"slug"`
+		Title string `param:"title"`
+	}) error {
+		err := s.Queries.AddTagToPost(c.Request().Context(), db.AddTagToPostParams{
+			PostSlug: req.Slug,
+			TagTitle: req.Title,
+		})
+		if err != nil {
+			slog.Error("add tag to post", "error", err)
+			return c.String(404, "post or tag not found")
+		}
+		return c.NoContent(204)
+	})
+}
+
+func (s *Server) removeTagFromPostHandler() echo.HandlerFunc {
+	return handler(func(c echo.Context, req struct {
+		Slug  string `param:"slug"`
+		Title string `param:"title"`
+	}) error {
+		err := s.Queries.RemoveTagFromPost(c.Request().Context(), db.RemoveTagFromPostParams{
+			PostSlug: req.Slug,
+			TagTitle: req.Title,
+		})
+		if err != nil {
+			slog.Error("remove tag from post", "error", err)
+			return c.String(404, "post or tag not found")
+		}
+		return c.NoContent(204)
+	})
+}
