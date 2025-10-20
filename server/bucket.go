@@ -65,10 +65,10 @@ func (s *Server) uploadPhotoToBucketHandler() echo.HandlerFunc {
 
 func (s *Server) updateObjectMetadataHandler() echo.HandlerFunc {
 	return handler(func(c echo.Context, req struct {
-		Name     string            `json:"name"`     // object key
 		Metadata map[string]string `json:"metadata"` // new metadata
 	}) error {
-		if err := bucket.UpdateObjectMetadata(c.Request().Context(), "photos", req.Name, req.Metadata); err != nil {
+		name := c.Param("name")
+		if err := bucket.UpdateObjectMetadata(c.Request().Context(), "photos", name, req.Metadata); err != nil {
 			slog.Error("update object metadata", "error", err)
 			return c.JSON(500, map[string]string{"error": "unable to update metadata"})
 		}

@@ -25,14 +25,14 @@ func (s *Server) Run() error {
 	api.POST("/photos", s.addPhotoHandler(), RequireAdminMiddleware) // add photo (POST /api/v1/photos) - admin only
 
 	// bucket (photo storage) endpoints (/api/v1/bucket)
-	api.GET("/bucket", s.listAllBucketPhotoObjects, RequireAdminMiddleware)              // list all bucket objects (GET /api/v1/bucket) - admin only
-	api.POST("/bucket", s.uploadPhotoToBucketHandler(), RequireAdminMiddleware)          // upload photo to bucket (POST /api/v1/bucket) - admin only
-	api.PATCH("/bucket/object", s.updateObjectMetadataHandler(), RequireAdminMiddleware) // update object metadata (PATCH /api/v1/bucket/object) - admin only
+	api.GET("/objects", s.listAllBucketPhotoObjects, RequireAdminMiddleware)             // list all bucket objects (GET /api/v1/bucket) - admin only
+	api.POST("/objects", s.uploadPhotoToBucketHandler(), RequireAdminMiddleware)         // upload photo to bucket (POST /api/v1/bucket) - admin only
+	api.PATCH("/objects/:name", s.updateObjectMetadataHandler(), RequireAdminMiddleware) // update object metadata (PATCH /api/v1/bucket/object) - admin only
 
 	// tags endpoints (/api/v1/tags)
-	api.GET("/tags", s.listTags)                                      // list all tags (GET /api/v1/tags)
-	api.POST("/tags", s.addTagHandler(), RequireAdminMiddleware)      // add tag (POST /api/v1/tags) - admin only
-	api.DELETE("/tags", s.deleteTagHandler(), RequireAdminMiddleware) // delete tag (DELETE /api/v1/tags) - admin only
+	api.GET("/tags", s.listTags)                                    // list all tags (GET /api/v1/tags)
+	api.POST("/tags", s.addTagHandler(), RequireAdminMiddleware)    // add tag (POST /api/v1/tags) - admin only
+	api.DELETE("/tags/:title", s.deleteTag, RequireAdminMiddleware) // delete tag (DELETE /api/v1/tags) - admin only
 
 	// admin endpoints (/api/v1/admin)
 	api.GET("/admin", s.isAdmin)                                                                   // check if admin (GET /api/v1/admin)

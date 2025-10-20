@@ -8,6 +8,7 @@ import (
 	"github.com/tiredkangaroo/ajiteshcc/gen/db"
 )
 
+// GET /api/v1/tags
 func (s *Server) listTags(c echo.Context) error {
 	data, err := s.Queries.ListTagsWithCount(c.Request().Context())
 	if err != nil {
@@ -17,6 +18,7 @@ func (s *Server) listTags(c echo.Context) error {
 	return c.JSON(200, data)
 }
 
+// POST /api/v1/tags
 func (s *Server) addTagHandler() echo.HandlerFunc {
 	return handler(func(c echo.Context, req struct {
 		Title   string `json:"title"`
@@ -33,14 +35,12 @@ func (s *Server) addTagHandler() echo.HandlerFunc {
 	})
 }
 
-func (s *Server) deleteTagHandler() echo.HandlerFunc {
-	return handler(func(c echo.Context, req struct {
-		Title string `json:"title"`
-	}) error {
-		if err := s.Queries.DeleteTag(context.Background(), req.Title); err != nil {
-			slog.Error("delete tag by title", "error", err)
-			return c.String(500, "internal server error")
-		}
-		return c.NoContent(204)
-	})
+// DELETE /api/v1/tags/:title
+func (s *Server) deleteTag(c echo.Context) error {
+	title := c.Param("title")
+	if err := s.Queries.DeleteTag(context.Background(), title); err != nil {
+		slog.Error("delete tag by title", "error", err)
+		return c.String(500, "internal server error")
+	}
+	return c.NoContent(204)
 }
