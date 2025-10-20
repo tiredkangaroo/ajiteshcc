@@ -61,6 +61,13 @@ func RequireAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func IsAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Set("is_admin", isAdmin(c))
+		return next(c)
+	}
+}
+
 // verify if the request has a valid admin JWT token
 func isAdmin(c echo.Context) bool {
 	adminToken, err := c.Cookie("admin_token")

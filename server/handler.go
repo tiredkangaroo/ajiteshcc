@@ -12,6 +12,12 @@ func handler[T any](fn func(c echo.Context, req T) error) echo.HandlerFunc {
 	var requiredFields []int
 	for i := range rt.NumField() {
 		field := rt.Field(i)
+		switch field.Type.Kind() {
+		case reflect.Pointer, reflect.Slice, reflect.Map, reflect.String, reflect.Interface, reflect.Array:
+			// these can be nil/zero, so we check for 'required' tag
+		default:
+			continue // skip other types
+		}
 		requiredStr := field.Tag.Get("required")
 		if requiredStr == "false" {
 			continue

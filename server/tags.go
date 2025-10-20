@@ -10,9 +10,9 @@ import (
 
 // GET /api/v1/tags
 func (s *Server) listTags(c echo.Context) error {
-	data, err := s.Queries.ListTagsWithCount(c.Request().Context())
+	data, err := s.Queries.ListTags(c.Request().Context())
 	if err != nil {
-		slog.Error("list tags with count", "error", err)
+		slog.Error("list tags", "error", err)
 		return c.String(500, "internal server error")
 	}
 	return c.JSON(200, data)

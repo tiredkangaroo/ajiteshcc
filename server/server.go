@@ -29,6 +29,10 @@ func (s *Server) Run() error {
 	api.POST("/objects", s.uploadPhotoToBucketHandler(), RequireAdminMiddleware)         // upload photo to bucket (POST /api/v1/bucket) - admin only
 	api.PATCH("/objects/:name", s.updateObjectMetadataHandler(), RequireAdminMiddleware) // update object metadata (PATCH /api/v1/bucket/object) - admin only
 
+	api.GET("/posts", s.listPosts, IsAdminMiddleware)              // list all posts (GET /api/v1/posts) -- admins see all, others see only published
+	api.GET("/posts/:slug", s.getPostBySlug, IsAdminMiddleware)    // get post by slug (GET /api/v1/posts/:slug) -- admins can see unpublished posts
+	api.POST("/posts", s.addPostHandler(), RequireAdminMiddleware) // add post (POST /api/v1/posts) - admin only
+
 	// tags endpoints (/api/v1/tags)
 	api.GET("/tags", s.listTags)                                    // list all tags (GET /api/v1/tags)
 	api.POST("/tags", s.addTagHandler(), RequireAdminMiddleware)    // add tag (POST /api/v1/tags) - admin only
