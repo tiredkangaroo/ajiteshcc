@@ -3,9 +3,12 @@ package server
 import (
 	"context"
 	"log/slog"
+	"net/url"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/tiredkangaroo/ajiteshcc/bucket"
+	"github.com/tiredkangaroo/ajiteshcc/env"
 	"github.com/tiredkangaroo/ajiteshcc/gen/db"
 )
 
@@ -35,12 +38,31 @@ func (s *Server) getPhotoByID(c echo.Context) error {
 
 func (s *Server) addPhotoHandler() echo.HandlerFunc {
 	return handler(func(c echo.Context, req struct {
-		Title    string         `json:"title" required:"false"`
-		PhotoURL string         `json:"photo_url"`
-		Comment  string         `json:"comment" required:"false"`
-		Metadata map[string]any `json:"metadata" required:"false"`
-		Tags     []string       `json:"tags" required:"false"`
+		Title    string   `json:"title" required:"false"`
+		PhotoURL string   `json:"photo_url"`
+		Comment  string   `json:"comment" required:"false"`
+		Tags     []string `json:"tags" required:"false"`
 	}) error {
+		purl, err := url.Parse(req.PhotoURL)
+		if err != nil {
+			slog.Error("parse photo URL", "error", err)
+			return c.String(400, "bad request: invalid photo URL")
+		}
+		objKey := purl.Path
+		if len(objKey) > 0 && objKey[0] == '/' {
+			objKey = objKey[1:]
+		}
+		// let's see if we can pull metadata from the photo URL
+		md, err := bucket.GetObjectMetadata(
+			c.Request().Context(),
+			env.DefaultEnv.R2_PHOTOS_BUCKET_NAME,
+			objKey,
+		)
+		if err != nil {
+			slog.Error("get object metadata", "error", err)
+			return c.String(500, "internal server error")
+		}
+
 		tx, err := s.Conn.Begin(c.Request().Context())
 		if err != nil {
 			slog.Error("begin transaction", "error", err)
@@ -53,8 +75,9 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 			Title:    pgText(req.Title),
 			PhotoUrl: req.PhotoURL,
 			Comment:  pgText(req.Comment),
-			Metadata: req.Metadata,
+			Metadata: md,
 		})
+
 		if err != nil {
 			slog.Error("add photo", "error", err)
 			return c.String(500, "internal server error")

@@ -25,7 +25,9 @@ func (s *Server) Run() error {
 	api.POST("/photos", s.addPhotoHandler(), RequireAdminMiddleware) // add photo (POST /api/v1/photos) - admin only
 
 	// bucket (photo storage) endpoints (/api/v1/bucket)
-	api.GET("/bucket", s.listAllBucketPhotoObjects) // list all bucket objects (GET /api/v1/bucket)
+	api.GET("/bucket", s.listAllBucketPhotoObjects, RequireAdminMiddleware)              // list all bucket objects (GET /api/v1/bucket) - admin only
+	api.POST("/bucket", s.uploadPhotoToBucketHandler(), RequireAdminMiddleware)          // upload photo to bucket (POST /api/v1/bucket) - admin only
+	api.PATCH("/bucket/object", s.updateObjectMetadataHandler(), RequireAdminMiddleware) // update object metadata (PATCH /api/v1/bucket/object) - admin only
 
 	// tags endpoints (/api/v1/tags)
 	api.GET("/tags", s.listTags)                                      // list all tags (GET /api/v1/tags)

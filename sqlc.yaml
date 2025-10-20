@@ -11,7 +11,7 @@ sql:
         overrides:
           - column: "photos.metadata"
             go_type:
-              type: "map[string]any"
+              type: "map[string]string"
           - db_type: "json"
             go_type:
               import: "encoding/json"

@@ -11,7 +11,8 @@ type Environment struct {
 	POSTGRES_CONNECTION_URI     string
 	JWT_SECRET                  []byte
 	R2_ACCOUNT_ID               string
-	R2_API_TOKEN                string
+	R2_ACCESS_KEY_ID            string
+	R2_SECRET_ACCESS_KEY        string
 	R2_PHOTOS_BUCKET_NAME       string
 	R2_PHOTOS_BUCKET_PUBLIC_URL *url.URL
 	TOTP_SECRET                 string
@@ -28,7 +29,8 @@ func init() {
 		JWT_SECRET:                  []byte(envRequire("JWT_SECRET")),
 		TOTP_SECRET:                 envRequire("TOTP_SECRET"),
 		R2_ACCOUNT_ID:               envRequire("R2_ACCOUNT_ID"),
-		R2_API_TOKEN:                envRequire("R2_API_TOKEN"),
+		R2_ACCESS_KEY_ID:            envRequire("R2_ACCESS_KEY_ID"),
+		R2_SECRET_ACCESS_KEY:        envRequire("R2_SECRET_ACCESS_KEY"),
 		R2_PHOTOS_BUCKET_NAME:       envDefault("R2_PHOTOS_BUCKET_NAME", "photos"),
 		R2_PHOTOS_BUCKET_PUBLIC_URL: urlRequire(envRequire("R2_PHOTOS_BUCKET_PUBLIC_URL")),
 		DEBUG:                       os.Getenv("DEBUG") == "true",
