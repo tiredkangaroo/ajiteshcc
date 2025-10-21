@@ -1,10 +1,14 @@
 package server
 
 import (
+	"log/slog"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/tiredkangaroo/ajiteshcc/env"
 	"github.com/tiredkangaroo/ajiteshcc/gen/db"
 )
@@ -16,8 +20,29 @@ type Server struct {
 
 func (s *Server) Run() error {
 	e := echo.New()
+	if env.DefaultEnv.DEBUG {
+		slog.Info("running server in debug mode")
+		e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+			// - time_unix - time_unix_milli - time_unix_micro - time_unix_nano - time_rfc3339 - time_rfc3339_nano - time_custom - id (Request ID) - remote_ip - uri - host - method - path - route - protocol - referer - user_agent - status - error - latency (In nanoseconds) - latency_human (Human readable) - bytes_in (Bytes received) - bytes_out (Bytes sent) - header:<NAME> - query:<NAME> - form:<NAME> - custom (see CustomTagFunc field)
+			Format:           "${time_custom} ${method} ${uri} ${status}\n",
+			CustomTimeFormat: time.DateTime,
+		}))
+	} else {
+		slog.Info("running server in production mode")
+	}
 
 	api := e.Group("/api/v1")
+
+	allowedOrigins := strings.Split(env.DefaultEnv.CORS_ALLOWED_ORIGINS, ",")
+	api.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOriginFunc: func(origin string) (bool, error) {
+			if env.DefaultEnv.DEBUG {
+				return true, nil
+			}
+			return slices.Contains(allowedOrigins, origin), nil
+		},
+		AllowCredentials: true,
+	}))
 
 	// photos endpoints (/api/v1/photos)
 	api.GET("/photos", s.getAllPhotos)                                                          // list all photos (GET /api/v1/photos)
@@ -31,6 +56,7 @@ func (s *Server) Run() error {
 	api.POST("/objects", s.uploadPhotoToBucketHandler(), RequireAdminMiddleware)         // upload photo to bucket (POST /api/v1/bucket) - admin only
 	api.PATCH("/objects/:name", s.updateObjectMetadataHandler(), RequireAdminMiddleware) // update object metadata (PATCH /api/v1/bucket/object) - admin only
 
+	// posts endpoints (/api/v1/posts)
 	api.GET("/posts", s.listPosts, IsAdminMiddleware)                                           // list all posts (GET /api/v1/posts) -- admins see all, others see only published
 	api.GET("/posts/:slug", s.getPostBySlug, IsAdminMiddleware)                                 // get post by slug (GET /api/v1/posts/:slug) -- admins can see unpublished posts
 	api.POST("/posts", s.addPostHandler(), RequireAdminMiddleware)                              // add post (POST /api/v1/posts) - admin only
