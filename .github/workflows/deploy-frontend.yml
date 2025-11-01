@@ -39,10 +39,10 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-          cache-dependency-path: frontend/pnpm-lock.yaml # 👈 FIX
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-workspace
 
       - name: Build static site
         run: pnpm build
