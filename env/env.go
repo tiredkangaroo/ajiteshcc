@@ -22,6 +22,10 @@ type Environment struct {
 	R2_PHOTOS_BUCKET_NAME string
 	// R2_PHOTOS_BUCKET_PUBLIC_URL is the public URL of the photos bucket (e.g., https://photos.ajitesh.cc)
 	R2_PHOTOS_BUCKET_PUBLIC_URL *url.URL
+	// CERT_FILE is the path to the TLS certificate file
+	CERT_FILE string
+	// KEY_FILE is the path to the TLS key file
+	KEY_FILE string
 	// TOTP_SECRET is the totp secret used for admin login
 	TOTP_SECRET string
 	// DEBUG allows for insecure behaviors. DO NOT ENABLE IN PRODUCTION
@@ -45,6 +49,8 @@ func init() {
 		R2_ACCESS_KEY_ID:            envRequire("R2_ACCESS_KEY_ID"),
 		R2_SECRET_ACCESS_KEY:        envRequire("R2_SECRET_ACCESS_KEY"),
 		R2_PHOTOS_BUCKET_NAME:       envDefault("R2_PHOTOS_BUCKET_NAME", "photos"),
+		CERT_FILE:                   envDefault("CERT_FILE", ""),
+		KEY_FILE:                    envDefault("KEY_FILE", ""),
 		R2_PHOTOS_BUCKET_PUBLIC_URL: urlRequire(envRequire("R2_PHOTOS_BUCKET_PUBLIC_URL")),
 		DEBUG:                       os.Getenv("DEBUG") == "true",
 		CORS_ALLOWED_ORIGINS:        envDefault("CORS_ALLOWED_ORIGINS", "https://ajitesh.cc"),

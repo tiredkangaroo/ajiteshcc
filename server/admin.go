@@ -61,8 +61,8 @@ func setAdminCookie(c echo.Context, jwtToken string, now time.Time) {
 		Value:    jwtToken,
 		Expires:  now.Add(1 * time.Hour),
 		HttpOnly: true,
-		Secure:   !env.DefaultEnv.DEBUG,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   !env.DefaultEnv.DEBUG || (env.DefaultEnv.CERT_FILE != "" && env.DefaultEnv.KEY_FILE != ""),
+		SameSite: http.SameSiteNoneMode,
 	})
 }
 

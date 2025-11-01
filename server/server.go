@@ -74,5 +74,11 @@ func (s *Server) Run() error {
 	if env.DefaultEnv.DEBUG {
 		api.GET("/admin-force", s.noCheckAdmin)
 	}
+
+	if env.DefaultEnv.CERT_FILE != "" && env.DefaultEnv.KEY_FILE != "" {
+		slog.Info("serving", "addr", env.DefaultEnv.ADDR, "tls", "enabled")
+		return e.StartTLS(env.DefaultEnv.ADDR, env.DefaultEnv.CERT_FILE, env.DefaultEnv.KEY_FILE)
+	}
+	slog.Info("serving", "addr", env.DefaultEnv.ADDR, "tls", "disabled")
 	return e.Start(env.DefaultEnv.ADDR)
 }
