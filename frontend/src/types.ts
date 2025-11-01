@@ -4,7 +4,7 @@ export interface Photo {
   photo_url: string;
   comment?: string;
   metadata?: Metadata;
-  tags: Tag;
+  tags: Tag[];
 }
 
 export interface Metadata {
