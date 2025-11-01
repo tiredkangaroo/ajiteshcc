@@ -98,41 +98,16 @@
     Loading photos...
   </div>
 {:else}
-  <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+  <div class="h-screen overflow-y-scroll snap-y snap-mandatory">
     {#each photos as photo}
-      <div class="m-4 rounded-lg overflow-hidden bg-gray-200">
+      <div
+        class="h-screen w-full snap-start flex items-center justify-center bg-black"
+      >
         <img
           src={photo.photo_url}
           alt={photo.title || "Photo"}
-          class="w-full"
+          class="h-screen w-auto object-contain"
         />
-        {#if photo.title || photo.comment}
-          <div class="p-4">
-            <div class="flex flex-row gap-4">
-              {#if photo.title}
-                <h3 class="text-lg font-semibold mb-2">{photo.title}</h3>
-              {/if}
-              <div>
-                {#each photo.tags as tag}
-                  <span
-                    class="inline-block bg-gray-400 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                    >{tag.title}</span
-                  >
-                {/each}
-              </div>
-            </div>
-            {#if photo.comment}
-              <p class="text-gray-700 text-base">{photo.comment}</p>
-            {/if}
-          </div>
-          {#if photo.metadata}
-            <div class="mt-3 px-4 py-2">
-              <p>{metadataLine1(photo.metadata)}</p>
-              <p>{metadataLine2(photo.metadata)}</p>
-              <p>{metadataLine3(photo.metadata)}</p>
-            </div>
-          {/if}
-        {/if}
       </div>
     {/each}
   </div>

@@ -9,7 +9,7 @@
       <img
         src="https://avatars.githubusercontent.com/u/81335306?v=4"
         alt="tiredkangaroo pfp"
-        class="w-48 rounded-4xl"
+        class="w-48"
       />
       <h1 class="mt-4">{$isAdmin ? "hi, aji!" : "Ajitesh Kumar"}</h1>
     </div>

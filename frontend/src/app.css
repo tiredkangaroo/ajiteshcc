@@ -3,6 +3,7 @@
 :root, html, body, #sv-body {
     width: 100%;
     height: 100%;
+    font-family: 'Times New Roman', serif, sans-serif;
 }
 
 h1 {
