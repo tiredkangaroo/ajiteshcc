@@ -5,7 +5,8 @@ on:
     branches:
       - main
     paths:
-      - "frontend/**"
+      - "frontend/**" # only trigger when files inside frontend change
+      - ".github/workflows/deploy-frontend.yml" # or when this workflow file changes bc it may affect the build/deploy process
   workflow_dispatch:
 
 permissions:
