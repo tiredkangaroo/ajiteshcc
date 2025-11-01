@@ -5,9 +5,8 @@ on:
     branches:
       - main
     paths:
-      - "frontend/**" # only trigger when files inside frontend change
-      - ".github/workflows/deploy-frontend.yml" # or when this workflow file changes bc it may affect the build/deploy process
-  workflow_dispatch: # allow manual trigger
+      - "frontend/**"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -38,7 +37,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml # 👈 FIX
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
