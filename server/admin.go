@@ -34,20 +34,35 @@ func (s *Server) adminLoginHandler() echo.HandlerFunc {
 	return handler(func(c echo.Context, req struct {
 		TOTP string `json:"totp"`
 	}) error {
-		jwtToken, err := issueJWTWithTOTP(req.TOTP)
+		jwtToken, err := issueJWTCheckTOTP(req.TOTP)
 		if err != nil {
 			slog.Error("issue jwt with totp", "error", err)
 			return c.String(403, "forbidden: invalid TOTP code")
 		}
-		c.SetCookie(&http.Cookie{
-			Name:     "admin_token",
-			Value:    jwtToken,
-			Expires:  time.Now().Add(1 * time.Hour),
-			HttpOnly: true,
-			Secure:   !env.DefaultEnv.DEBUG,
-			SameSite: http.SameSiteLaxMode,
-		})
+		setAdminCookie(c, jwtToken, time.Now())
 		return c.NoContent(204)
+	})
+}
+
+func (s *Server) noCheckAdmin(c echo.Context) error {
+	now := time.Now()
+	token, err := issueJWT(now)
+	if err != nil {
+		slog.Error("issue jwt", "error", err)
+		return c.String(500, "internal server error")
+	}
+	setAdminCookie(c, token, now)
+	return c.NoContent(204)
+}
+
+func setAdminCookie(c echo.Context, jwtToken string, now time.Time) {
+	c.SetCookie(&http.Cookie{
+		Name:     "admin_token",
+		Value:    jwtToken,
+		Expires:  now.Add(1 * time.Hour),
+		HttpOnly: true,
+		Secure:   !env.DefaultEnv.DEBUG,
+		SameSite: http.SameSiteLaxMode,
 	})
 }
 
@@ -82,7 +97,7 @@ func isAdmin(c echo.Context) bool {
 }
 
 // issue a JWT token if the provided TOTP code is valid
-func issueJWTWithTOTP(timePasscode string) (string, error) {
+func issueJWTCheckTOTP(timePasscode string) (string, error) {
 	now := time.Now()
 	ok, err := totp.ValidateCustom(timePasscode, env.DefaultEnv.TOTP_SECRET, now, totp_validation_opts)
 	if err != nil {
@@ -90,7 +105,10 @@ func issueJWTWithTOTP(timePasscode string) (string, error) {
 	} else if !ok {
 		return "", InvalidTOTPError
 	}
+	return issueJWT(now)
+}
 
+func issueJWT(now time.Time) (string, error) {
 	claims := &jwt.RegisteredClaims{
 		Issuer:    "ajiteshcc-admin-service",
 		Subject:   "administrator",
