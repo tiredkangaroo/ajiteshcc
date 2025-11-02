@@ -3,6 +3,17 @@
   import { fetchBackend } from "../../utils";
 
   let photos: Photo[] | null = $state(null);
+  let photoCols: Photo[][] = $derived.by(() => {
+    if (photos === null) {
+      return [];
+    }
+    let cols = [];
+    for (let i = 0; i < photos.length; i += 3) {
+      cols.push(photos.slice(i, i + 3));
+    }
+    return cols;
+  });
+
   $effect(() => {
     async function loadPhotos() {
       const res = await fetchBackend("/api/v1/photos");
@@ -91,6 +102,11 @@
     }
     return parts.join(", ");
   }
+  function metadata(md: Metadata): string {
+    return (
+      metadataLine1(md) + "\n" + metadataLine2(md) + "\n" + metadataLine3(md)
+    );
+  }
 </script>
 
 {#if photos === null}
@@ -98,17 +114,21 @@
     Loading photos...
   </div>
 {:else}
-  <div class="h-screen overflow-y-scroll snap-y snap-mandatory">
-    {#each photos as photo}
-      <div
-        class="h-screen w-full snap-start flex items-center justify-center bg-black"
-      >
-        <img
-          src={photo.photo_url}
-          alt={photo.title || "Photo"}
-          class="h-screen w-auto object-contain"
-        />
-      </div>
-    {/each}
+  <div
+    class="flex flex-col justify-center align-middle items-center w-full h-full"
+  >
+    <div class="w-[90%] h-[90%] flex flex-wrap justify-center gap-4">
+      {#each photos as photo}
+        <div class="flex flex-col items-center">
+          <img
+            src={photo.photo_url}
+            alt={photo.title}
+            class="max-w-[400px] max-h-[300px] object-cover rounded-lg"
+          />
+          <h2 class="mt-2 text-lg font-semibold">{photo.title}</h2>
+          <p class="text-sm text-gray-600">{photo.comment}</p>
+        </div>
+      {/each}
+    </div>
   </div>
 {/if}
