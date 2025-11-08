@@ -24,7 +24,7 @@ services:
       - DEBUG=${DEBUG}
       - ADDR=:8081
     volumes:
-      - ./:/app
+      - ./certs:/app/certs
     restart: unless-stopped
   postgres:
     image: postgres:14.15
