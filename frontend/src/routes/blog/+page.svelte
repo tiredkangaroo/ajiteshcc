@@ -56,16 +56,23 @@
             >
             <p class="mt-2">{postHead.comment}</p>
           </div>
-          <div class="flex-1 flex justify-end items-end py-1">
-            {#each postHead.tags as tag}
-              <button
-                class="ml-2 px-4 py-1 bg-amber-300 text-sm font-light"
-                title={tag.comment}
-                onclick={() => {
-                  window.location.replace(`/tags/${tag.title}`);
-                }}>{tag.title}</button
-              >
-            {/each}
+          <div class="flex-1 flex flex-col items-end py-1 justify-between">
+            <span
+              class="text-sm font-light"
+              style={postHead.published ? "color: #02a317" : "color: #b30015"}
+              >{postHead.published ? "published" : "unpublished"}</span
+            >
+            <div class="flex flex-wrap justify-end">
+              {#each postHead.tags as tag}
+                <button
+                  class="ml-2 px-4 h-fit bg-amber-300 text-sm font-light"
+                  title={tag.comment}
+                  onclick={() => {
+                    window.location.replace(`/tags/${tag.title}`);
+                  }}>{tag.title}</button
+                >
+              {/each}
+            </div>
           </div>
         </div>
       {/each}

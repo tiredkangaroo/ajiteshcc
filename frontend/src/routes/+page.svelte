@@ -8,7 +8,9 @@
     <div class="flex flex-col gap-2 justify-center items-center">
       <h1 class="mt-4">{$isAdmin ? "hi, aji!" : "Ajitesh Kumar"}</h1>
       {#if $isAdmin}
-        <div class="flex flex-row text-blue text-underline justify-between">
+        <div
+          class="w-full flex flex-row text-blue text-underline justify-between"
+        >
           <a href="/admin">control panel</a>
           <button
             class="text-amber-700 underline"
