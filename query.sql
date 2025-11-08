@@ -81,11 +81,11 @@ LEFT JOIN post_tags pt ON t.title = pt.tag_title
 GROUP BY t.title, t.comment;
 
 -- name: CreatePost :exec
-INSERT INTO posts (slug, published, content) 
-VALUES ($1, $2, $3);
+INSERT INTO posts (slug, published, title, comment, content) 
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: ListPostsWithTags :many
-SELECT p.slug, p.published, p.content, p.created_at,
+SELECT p.slug, p.title, p.comment, p.published, p.created_at,
        COALESCE(
            JSONB_AGG(
                JSONB_BUILD_OBJECT(
@@ -100,7 +100,7 @@ LEFT JOIN tags t ON pt.tag_title = t.title
 GROUP BY p.slug;
 
 -- name: ListPublishedPostsWithTags :many
-SELECT p.slug, p.published, p.content, p.created_at,
+SELECT p.slug, p.title, p.comment, p.published, p.created_at,
          COALESCE(
               JSONB_AGG(
                 JSONB_BUILD_OBJECT(
@@ -116,7 +116,7 @@ WHERE p.published = TRUE
 GROUP BY p.slug;
 
 -- name: GetPostBySlugWithTags :one
-SELECT p.slug, p.published, p.content, p.created_at,
+SELECT p.slug, p.title, p.comment, p.published, p.content, p.created_at,
          COALESCE( 
                 JSONB_AGG(
                     JSONB_BUILD_OBJECT(

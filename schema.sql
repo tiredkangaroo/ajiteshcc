@@ -9,6 +9,8 @@ CREATE TABLE photos (
 CREATE TABLE posts (
     slug TEXT PRIMARY KEY,
     published BOOLEAN NOT NULL DEFAULT FALSE,
+    title TEXT NOT NULL,
+    comment TEXT,
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

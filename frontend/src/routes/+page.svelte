@@ -15,7 +15,7 @@
         class="w-48 h-48"
       />
     </div>
-    <h2><a href="/projects">projects 💻</a></h2>
+    <!-- <h2><a href="/projects">projects 💻</a></h2> -->
     <h2><a href="/photography">photography 📷</a></h2>
     <h2><a href="/blog">blog 📝</a></h2>
   </div>

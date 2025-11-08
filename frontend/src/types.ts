@@ -29,3 +29,20 @@ export interface Tag {
   title: string;
   comment: string;
 }
+
+export interface PostHead {
+  slug: string;
+  published: boolean;
+  title: string;
+  created_at: string;
+  comment: string;
+  tags: Tag[];
+}
+
+export interface Post extends PostHead {
+  content: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+}

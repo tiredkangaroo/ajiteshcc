@@ -39,9 +39,15 @@ func handler[T any](fn func(c echo.Context, req T) error) echo.HandlerFunc {
 	}
 }
 
+func sendError(c echo.Context, code int, err string) error {
+	return c.JSON(code, map[string]string{
+		"error": err,
+	})
+}
+
 func pgText(s string) pgtype.Text {
 	return pgtype.Text{
 		String: s,
-		Valid:  true,
+		Valid:  s != "",
 	}
 }
