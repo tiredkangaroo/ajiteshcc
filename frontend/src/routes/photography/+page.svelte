@@ -14,6 +14,13 @@
     return cols;
   });
 
+  let lastClickedImageID: number | undefined = $state(undefined);
+  let lastClickedImageMetadata: Metadata | null = $derived.by(() => {
+    if (lastClickedImageID === undefined || photos === null) {
+      return undefined;
+    }
+  });
+
   $effect(() => {
     async function loadPhotos() {
       const res = await fetchBackend("/api/v1/photos");
@@ -114,21 +121,42 @@
     Loading photos...
   </div>
 {:else}
-  <div
-    class="flex flex-col justify-center align-middle items-center w-full h-full"
-  >
-    <div class="w-[90%] h-[90%] flex flex-wrap justify-center gap-4">
-      {#each photos as photo}
-        <div class="flex flex-col items-center">
-          <img
-            src={photo.photo_url}
-            alt={photo.title}
-            class="max-w-[400px] max-h-[300px] object-cover rounded-lg"
-          />
-          <h2 class="mt-2 text-lg font-semibold">{photo.title}</h2>
-          <p class="text-sm text-gray-600">{photo.comment}</p>
+  <div class="">
+    <h1 class="text-center my-2">photography 📷</h1>
+    <div class="flex flex-row w-full h-full overflow-hidden">
+      <div class="w-full flex flex-wrap justify-center gap-4 overflow-y-auto">
+        {#each photos as photo, index}
+          <div
+            class="flex flex-col items-center"
+            aria-roledescription="click to view metadata"
+            onclick={() => {
+              if (lastClickedImageID === index) {
+                lastClickedImageID = undefined; // unclick
+                return;
+              }
+              lastClickedImageID = index;
+            }}
+          >
+            <img
+              src={photo.photo_url}
+              alt={photo.title}
+              class="max-w-[400px] max-h-[300px] object-cover rounded-lg"
+            />
+            <h2 class="mt-2 text-lg font-semibold">{photo.title}</h2>
+            <p class="text-sm text-gray-600">{photo.comment}</p>
+          </div>
+        {/each}
+      </div>
+      {#if lastClickedImageID}
+        <div class="w-[25%] mr-2 p-2 rounded-3xl border border-black">
+          <h2 class="font-semibold">lens</h2>
+          <div>
+            {#if lastClickedImageMetadata?.lensmake}
+              <p>{lastClickedImageMetadata.lensmake}</p>
+            {/if}
+          </div>
         </div>
-      {/each}
+      {/if}
     </div>
   </div>
 {/if}
