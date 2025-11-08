@@ -23,6 +23,8 @@ services:
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
       - DEBUG=${DEBUG}
       - ADDR=:8081
+    volumes:
+      - ./:/app
     restart: unless-stopped
   postgres:
     image: postgres:14.15
