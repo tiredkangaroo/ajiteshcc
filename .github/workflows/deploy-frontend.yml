@@ -45,6 +45,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build static site
+        env:
+          VITE_BACKEND_URL: "https://api.ajitesh.cc"
         run: pnpm build
 
       - name: Upload build output for deployment
