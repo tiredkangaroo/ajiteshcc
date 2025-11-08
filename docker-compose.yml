@@ -7,7 +7,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - "8081:8081"
+      - "${HOST_PORT}${ADDR}"
     command: [ "/app" ]
     environment:
       - POSTGRES_CONNECTION_URI=postgres://user:password@postgres:5432/ajiteshcc
@@ -22,7 +22,7 @@ services:
       - KEY_FILE=${KEY_FILE}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
       - DEBUG=${DEBUG}
-      - ADDR=:8081
+      - ADDR=${ADDR}
     volumes:
       - ./certs:/app/certs
     restart: unless-stopped
