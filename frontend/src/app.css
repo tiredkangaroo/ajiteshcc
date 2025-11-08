@@ -7,15 +7,19 @@
 }
 
 h1 {
-    @apply text-3xl;
-    font-weight: 700;
+    @apply font-bold text-4xl;
 }
+
 h2 {
     @apply text-2xl;    
 }
 
 a {
-    @apply text-blue-800 underline;
+    @apply text-amber-700 underline;
+}
+
+a:visited {
+    @apply text-amber-800;
 }
 
 button {

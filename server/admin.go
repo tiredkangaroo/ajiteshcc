@@ -44,6 +44,21 @@ func (s *Server) adminLoginHandler() echo.HandlerFunc {
 	})
 }
 
+func (s *Server) adminLogoutHandler(c echo.Context) error {
+	c.SetCookie(&http.Cookie{
+		Name:     "admin_token",
+		Value:    "",
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   !env.DefaultEnv.DEBUG || (env.DefaultEnv.CERT_FILE != "" && env.DefaultEnv.KEY_FILE != ""),
+		SameSite: http.SameSiteNoneMode,
+		Domain:   env.DefaultEnv.BACKEND_DOMAIN,
+		Path:     "/",
+	})
+	return c.NoContent(204)
+}
+
 func (s *Server) noCheckAdmin(c echo.Context) error {
 	now := time.Now()
 	token, err := issueJWT(now)
@@ -63,6 +78,8 @@ func setAdminCookie(c echo.Context, jwtToken string, now time.Time) {
 		HttpOnly: true,
 		Secure:   !env.DefaultEnv.DEBUG || (env.DefaultEnv.CERT_FILE != "" && env.DefaultEnv.KEY_FILE != ""),
 		SameSite: http.SameSiteNoneMode,
+		Domain:   env.DefaultEnv.BACKEND_DOMAIN,
+		Path:     "/",
 	})
 }
 

@@ -35,6 +35,8 @@ type Environment struct {
 	CORS_ALLOWED_ORIGINS string
 	// ADDR is the address the server listens on (e.g., ":8080")
 	ADDR string
+	// BACKEND_DOMAIN is the domain of the backend server (used for setting cookie domain)
+	BACKEND_DOMAIN string
 }
 
 var DefaultEnv Environment
@@ -55,6 +57,7 @@ func init() {
 		DEBUG:                       os.Getenv("DEBUG") == "true",
 		CORS_ALLOWED_ORIGINS:        envDefault("CORS_ALLOWED_ORIGINS", "https://ajitesh.cc"),
 		ADDR:                        envRequire("ADDR"),
+		BACKEND_DOMAIN:              envRequire("BACKEND_DOMAIN"),
 	}
 }
 
