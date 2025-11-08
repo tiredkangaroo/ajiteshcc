@@ -15,10 +15,14 @@
   });
 
   let lastClickedImageID: number | undefined = $state(undefined);
-  let lastClickedImageMetadata: Metadata | null = $derived.by(() => {
+  let lcImageMetadata: Metadata | null = $derived.by(() => {
     if (lastClickedImageID === undefined || photos === null) {
-      return undefined;
+      return null;
     }
+    if (photos[lastClickedImageID] && photos[lastClickedImageID].metadata) {
+      return photos[lastClickedImageID].metadata!;
+    }
+    return null;
   });
 
   $effect(() => {
@@ -121,12 +125,14 @@
     Loading photos...
   </div>
 {:else}
-  <div class="">
+  <div class="h-screen">
     <h1 class="text-center my-2">photography 📷</h1>
     <div class="flex flex-row w-full h-full overflow-hidden">
-      <div class="w-full flex flex-wrap justify-center gap-4 overflow-y-auto">
+      <div
+        class="flex flex-wrap w-full h-[90%] justify-center gap-4 overflow-y-auto"
+      >
         {#each photos as photo, index}
-          <div
+          <button
             class="flex flex-col items-center"
             aria-roledescription="click to view metadata"
             onclick={() => {
@@ -144,19 +150,9 @@
             />
             <h2 class="mt-2 text-lg font-semibold">{photo.title}</h2>
             <p class="text-sm text-gray-600">{photo.comment}</p>
-          </div>
+          </button>
         {/each}
       </div>
-      {#if lastClickedImageID}
-        <div class="w-[25%] mr-2 p-2 rounded-3xl border border-black">
-          <h2 class="font-semibold">lens</h2>
-          <div>
-            {#if lastClickedImageMetadata?.lensmake}
-              <p>{lastClickedImageMetadata.lensmake}</p>
-            {/if}
-          </div>
-        </div>
-      {/if}
     </div>
   </div>
 {/if}
