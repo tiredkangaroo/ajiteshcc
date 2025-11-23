@@ -1,9 +1,13 @@
 # Start from the official Go image
 FROM golang:1.24-alpine AS builder
 
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
 ENV CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+    GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH}
 
 # Set the working directory
 WORKDIR /app
@@ -11,17 +15,7 @@ WORKDIR /app
 # Install necessary tools
 RUN apk add --no-cache bash git curl
 
-ARG TARGETPLATFORM
-
-RUN case "$TARGETPLATFORM" in \
-    "linux/amd64")  TARGET_STRING="linux_amd64" ;; \
-    "linux/arm64")  TARGET_STRING="linux_arm64" ;; \
-    "darwin/amd64") TARGET_STRING="darwin_amd64" ;; \
-    "darwin/arm64") TARGET_STRING="darwin_arm64" ;; \
-    *) echo "Unsupported platform: $TARGETPLATFORM" && exit 1 ;; \
-    esac && \
-    curl -sSL "https://github.com/sqlc-dev/sqlc/releases/download/v1.30.0/sqlc_1.30.0_${TARGET_STRING}.tar.gz" \
-    | tar -xz -C /usr/local/bin sqlc
+RUN curl -sSL "https://github.com/sqlc-dev/sqlc/releases/download/v1.30.0/sqlc_1.30.0_${TARGETOS}_${TARGETARCH}.tar.gz" | tar -xz -C /usr/local/bin sqlc
 
 # copy go mod and sum files and download deps
 COPY go.mod go.sum ./
