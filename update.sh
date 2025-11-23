@@ -1,6 +1,7 @@
 if [[ ! -v HOST_PORT ]]; then
-    echo "What host machine port should the backend run on? "
+    echo -n "What host machine port should the backend run on? "
     read -r HOST_PORT
+    echo -e ""
     export HOST_PORT
 fi
 
