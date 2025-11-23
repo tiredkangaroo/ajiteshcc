@@ -1,3 +1,9 @@
+if [! [test -v "HOST_PORT"]] ; then
+    echo "What host machine port should the backend run on? "
+    read -r HOST_PORT
+    export HOST_PORT
+fi
+
 # docker compose down
 echo -n "docker compose down: "
 docker compose down
