@@ -46,7 +46,7 @@ jobs:
 
       - name: Build static site
         env:
-          VITE_BACKEND_URL: "https://api.ajitesh.cc"
+          VITE_BACKEND_URL: "https://server.ajitesh.cc"
         run: pnpm build
 
       - name: Upload build output for deployment
