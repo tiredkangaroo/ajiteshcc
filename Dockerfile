@@ -11,7 +11,17 @@ WORKDIR /app
 # Install necessary tools
 RUN apk add --no-cache bash git curl
 
-RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.30.0/sqlc_1.30.0_linux_amd64.tar.gz | tar -xz -C /usr/local/bin
+ARG TARGETPLATFORM
+
+RUN case "$TARGETPLATFORM" in \
+    "linux/amd64")  TARGET_STRING="linux_amd64" ;; \
+    "linux/arm64")  TARGET_STRING="linux_arm64" ;; \
+    "darwin/amd64") TARGET_STRING="darwin_amd64" ;; \
+    "darwin/arm64") TARGET_STRING="darwin_arm64" ;; \
+    *) echo "Unsupported platform: $TARGETPLATFORM" && exit 1 ;; \
+    esac && \
+    curl -sSL "https://github.com/sqlc-dev/sqlc/releases/download/v1.30.0/sqlc_1.30.0_${TARGET_STRING}.tar.gz" \
+    | tar -xz -C /usr/local/bin sqlc
 
 # copy go mod and sum files and download deps
 COPY go.mod go.sum ./
