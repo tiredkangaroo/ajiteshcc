@@ -72,8 +72,17 @@ func (s *Server) Run() error {
 	api.GET("/admin", s.isAdmin)                                                                   // check if admin (GET /api/v1/admin)
 	api.POST("/admin", s.adminLoginHandler(), NewRateLimiter(5, 10*time.Minute, false).Middleware) // admin login (POST /api/v1/admin) - uses global 5 requests per 10 minutes rate limiter
 	api.POST("/admin/logout", s.adminLogoutHandler, RequireAdminMiddleware)                        // admin logout (POST /api/v1/admin/logout)
+
 	if env.DefaultEnv.DEBUG {
-		api.GET("/admin-force", s.noCheckAdmin)
+		api.GET("/debug/acquire-admin", s.noCheckAdmin)
+		api.GET("/debug/disable-rate-limit", func(c echo.Context) error {
+			ratelimterEnabled = false
+			return c.NoContent(204)
+		})
+		api.GET("/debug/enable-rate-limit", func(c echo.Context) error {
+			ratelimterEnabled = true
+			return c.NoContent(204)
+		})
 	}
 
 	if env.DefaultEnv.CERT_FILE != "" && env.DefaultEnv.KEY_FILE != "" {

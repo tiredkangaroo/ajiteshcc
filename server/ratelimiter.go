@@ -8,6 +8,7 @@ import (
 )
 
 var global_identifier = "global"
+var ratelimterEnabled = true
 
 type RateLimiter struct {
 	RequestsAllowedInWindow int           // number of requests allowed in the sliding time window
@@ -19,6 +20,9 @@ type RateLimiter struct {
 }
 
 func (r *RateLimiter) AllowRequest(identifier string) bool {
+	if !ratelimterEnabled { // rate limiter disabled? allow request.
+		return true
+	}
 	r.mx.Lock()
 	defer r.mx.Unlock()
 

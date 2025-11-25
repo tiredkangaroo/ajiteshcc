@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -e
+
 if [[ ! -v HOST_PORT ]]; then
     echo -n "What host machine port should the backend run on? "
     read -r HOST_PORT
