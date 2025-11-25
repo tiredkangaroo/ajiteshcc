@@ -19,4 +19,8 @@
   });
 </script>
 
-{@render children()}
+{#if $isAdmin === undefined}
+  <div></div>
+{:else}
+  {@render children()}
+{/if}
