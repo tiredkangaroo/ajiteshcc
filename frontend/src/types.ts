@@ -5,6 +5,7 @@ export interface Photo {
   comment?: string;
   metadata?: Metadata;
   tags: Tag[];
+  isPrivate?: boolean;
 }
 
 export interface Metadata {
@@ -45,4 +46,11 @@ export interface Post extends PostHead {
 
 export interface ErrorResponse {
   error: string;
+}
+
+export interface Object {
+  name: string;
+  size: number;
+  public_url: string;
+  metadata: Record<string, string>;
 }
