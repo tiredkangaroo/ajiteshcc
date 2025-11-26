@@ -59,6 +59,9 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 			slog.Error("get object metadata", "error", err)
 			return c.String(500, "internal server error")
 		}
+		if len(md) == 0 {
+			md = map[string]string{}
+		}
 
 		tx, err := s.Conn.Begin(c.Request().Context())
 		if err != nil {
@@ -91,7 +94,10 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 			slog.Error("commit transaction", "error", err)
 			return c.String(500, "internal server error")
 		}
-		return c.NoContent(204)
+		return c.JSON(200, map[string]any{
+			"photo_id": photoID,
+			"metadata": md,
+		})
 	})
 }
 

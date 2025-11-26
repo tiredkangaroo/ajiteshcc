@@ -37,7 +37,7 @@
       />
     </div>
 
-    <div class="flex flex-col text-2xl gap-4 font-semibold text-amber-800">
+    <div class="flex flex-col text-2xl gap-4 text-amber-800">
       <h2><a class="hover:underline" href="/photography">photography 📷</a></h2>
       <h2><a class="hover:underline" href="/blog">blog 📝</a></h2>
     </div>

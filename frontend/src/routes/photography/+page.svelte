@@ -125,16 +125,16 @@
 </script>
 
 {#if photos === null}
-  <div class="w-full h-full justify-center items-center flex">
+  <div class="bg-amber-100 w-full h-full justify-center items-center flex">
     Loading photos...
   </div>
 {:else if photos.length === 0}
-  <div class="w-full h-full flex flex-col">
+  <div class="bg-amber-100 w-full h-full flex flex-col">
     {@render title()}
     <div class="h-full justify-center items-center flex">No photos.</div>
   </div>
 {:else}
-  <div class="h-screen">
+  <div class="bg-amber-100 h-screen">
     {@render title()}
     <div class="flex flex-row w-full h-full overflow-hidden">
       <PhotosView {photos} />
