@@ -8,7 +8,7 @@
 >
   <div class="flex flex-row justify-between items-center w-full max-w-5xl p-6">
     <div class="flex flex-col gap-4 justify-center items-center">
-      <h1 class="mt-2 text-4xl font-bold text-amber-900 drop-shadow-sm">
+      <h1 class="mt-2 text-4xl font-bold text-amber-900">
         {$isAdmin ? "hi, aji!" : "Ajitesh Kumar"}
       </h1>
 
