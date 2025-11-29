@@ -6,7 +6,7 @@
   let imageInDialog: Photo | null = $state(null);
 </script>
 
-{#if imageInDialog}
+<!-- {#if imageInDialog}
   <div
     class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
     onclick={() => {
@@ -19,7 +19,7 @@
       class="max-w-[90%] max-h-[90%] object-contain rounded-lg shadow-lg"
     />
   </div>
-{/if}
+{/if} -->
 
 <div class="flex flex-wrap w-full h-[90%] justify-center gap-4 overflow-y-auto">
   {#each photos as photo, index}
@@ -28,9 +28,6 @@
         src={photo.photo_url}
         alt={photo.title}
         class="w-full h-full object-cover rounded-lg"
-        onclick={() => {
-          imageInDialog = photo;
-        }}
       />
 
       {#if photo.title || photo.comment || (photo.tags && photo.tags.length > 0)}

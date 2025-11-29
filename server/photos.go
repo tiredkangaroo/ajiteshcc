@@ -101,6 +101,18 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 	})
 }
 
+func (s *Server) deletePhotoByIDHandler() echo.HandlerFunc {
+	return handler(func(c echo.Context, req struct {
+		ID int32 `param:"id"`
+	}) error {
+		if err := s.Queries.DeletePhotoByID(c.Request().Context(), req.ID); err != nil {
+			slog.Error("delete photo by id", "error", err)
+			return c.String(500, "internal server error")
+		}
+		return c.NoContent(204)
+	})
+}
+
 // PATCH /api/v1/photos/:id/tag/:title
 func (s *Server) addTagToPhotoHandler() echo.HandlerFunc {
 	return handler(func(c echo.Context, req struct {

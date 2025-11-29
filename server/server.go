@@ -48,6 +48,7 @@ func (s *Server) Run() error {
 	api.GET("/photos", s.getAllPhotos)                                                          // list all photos (GET /api/v1/photos)
 	api.GET("/photos/:id", s.getPhotoByIDHandler())                                             // get photo by ID (GET /api/v1/photos/:id)
 	api.POST("/photos", s.addPhotoHandler(), RequireAdminMiddleware)                            // add photo (POST /api/v1/photos) - admin only
+	api.DELETE("/photos/:id", s.deletePhotoByIDHandler(), RequireAdminMiddleware)               // delete photo by ID (DELETE /api/v1/photos/:id) - admin only
 	api.PATCH("/photos/:id/tag/:title", s.addTagToPhotoHandler(), RequireAdminMiddleware)       // add tag to photo (POST /api/v1/photos/tag) - admin only
 	api.DELETE("/photos/:id/tag/:title", s.removeTagFromPhotoHandler(), RequireAdminMiddleware) // remove tag from photo (DELETE /api/v1/photos/tag/:title) - admin only
 

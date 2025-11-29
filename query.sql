@@ -136,6 +136,9 @@ INSERT INTO photos (title, photo_url, comment, metadata)
 VALUES ($1, $2, $3, $4) 
 RETURNING id;
 
+-- name: DeletePhotoByID :exec
+DELETE FROM photos WHERE id = $1;
+
 -- name: CreateTag :exec
 INSERT INTO tags (title, comment) VALUES ($1, $2);
 
