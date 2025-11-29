@@ -40,6 +40,10 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 		Comment  string   `json:"comment" required:"false"`
 		Tags     []string `json:"tags" required:"false"`
 	}) error {
+		if len(req.Tags) == 0 {
+			req.Tags = nil
+		}
+
 		purl, err := url.Parse(req.PhotoURL)
 		if err != nil {
 			slog.Error("parse photo URL", "error", err)

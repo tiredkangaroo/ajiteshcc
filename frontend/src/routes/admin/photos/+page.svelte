@@ -19,6 +19,13 @@
 
   let sidebarPhoto = $state<Photo | null>(null);
 
+  let showingSidebarNewPhoto = $state(false);
+  let sidebarNewPhotoFile: File | null = $state(null);
+  let sidebarNewPhotoTitle = $state("");
+  let sidebarNewPhotoCaption = $state("");
+  let sidebarNewPhotoTags = $state("");
+  let sidebarNewPhotoPublic = $state(true);
+
   $effect(() => {
     async function loadObjectsAndPhotos() {
       const response = await fetchBackend("/api/v1/objects");
@@ -40,6 +47,14 @@
       </h1>
     </div>
 
+    <div class="justify-end flex mb-2">
+      <button
+        class="bg-amber-800 text-amber-100 px-6 py-1 rounded-xl"
+        onclick={() => {
+          showingSidebarNewPhoto = true;
+        }}>upload</button
+      >
+    </div>
     <div class="flex gap-6">
       <div class="flex-1 space-y-8">
         <div class="bg-white rounded-2xl shadow-lg p-6">
@@ -63,6 +78,16 @@
                     sidebarObject = null;
                   }
                   sidebarPhoto = photo;
+                }}
+                role="button"
+                tabindex="0"
+                onkeypress={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    if (sidebarObject != null) {
+                      sidebarObject = null;
+                    }
+                    sidebarPhoto = photo;
+                  }
                 }}
               >
                 <img
@@ -147,13 +172,16 @@
       {#if sidebarPhoto}
         {@render photoSidebar()}
       {/if}
+      {#if showingSidebarNewPhoto}
+        {@render newPhotoSidebar()}
+      {/if}
     </div>
   </div>
 </div>
 
 {#snippet objectSidebar()}
   <div
-    class="w-[400px] bg-white rounded-2xl shadow-2xl p-6 sticky top-8 h-fit overflow-y-auto"
+    class="w-[400px] bg-amber-100 border border-amber-300 rounded-2xl shadow-2xl p-6 sticky top-8 h-fit overflow-y-auto"
   >
     <div class="flex justify-between items-center mb-6">
       <h3 class="text-xl font-bold text-gray-800">publish photo</h3>
@@ -278,7 +306,7 @@
 
 {#snippet photoSidebar()}
   <div
-    class="w-[400px] bg-white rounded-2xl shadow-2xl p-6 sticky top-8 h-fit overflow-y-auto"
+    class="w-[400px] bg-amber-100 border border-amber-300 rounded-2xl shadow-2xl p-6 sticky top-8 h-fit overflow-y-auto"
   >
     <div class="flex justify-between items-center mb-6">
       <h3 class="text-xl font-bold text-gray-800">photo details</h3>
@@ -356,6 +384,250 @@
         }}
       >
         unpublish
+      </button>
+    </div>
+  </div>
+{/snippet}
+
+{#snippet newPhotoSidebar()}
+  <div
+    class="w-[400px] bg-amber-100 border border-amber-300 rounded-2xl shadow-2xl p-6 sticky top-8 h-fit overflow-y-auto"
+  >
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-bold text-gray-800">add new photo</h3>
+      <button
+        class="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-colors"
+        onclick={() => {
+          showingSidebarNewPhoto = false;
+        }}
+        title="close new photo sidebar"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Drag and Drop Area -->
+    {#if sidebarNewPhotoFile}
+      <div class="mb-6 flex flex-col justify-center items-center gap-2">
+        <img
+          src={URL.createObjectURL(sidebarNewPhotoFile!)}
+          alt="preview"
+          class="w-full h-48 object-contain rounded-xl"
+        />
+        <button
+          onclick={() => {
+            sidebarNewPhotoFile = null;
+          }}
+          class="bg-amber-800 text-amber-100 px-3 py-1 rounded-xl"
+        >
+          remove file
+        </button>
+      </div>
+    {:else}
+      <div
+        class="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+        ondragover={(event) => {
+          event.preventDefault();
+          event.currentTarget.classList.add("border-blue-500", "bg-blue-50");
+        }}
+        ondragleave={(event) => {
+          event.currentTarget.classList.remove("border-blue-500", "bg-blue-50");
+        }}
+        ondrop={(event) => {
+          event.preventDefault();
+          event.currentTarget.classList.remove("border-blue-500", "bg-blue-50");
+          const file = event.dataTransfer.files[0];
+          if (file && file.type.startsWith("image/")) {
+            sidebarNewPhotoFile = file;
+          }
+        }}
+        onclick={() => {
+          document.getElementById("fileInput")!.click();
+        }}
+      >
+        <svg
+          class="w-12 h-12 mx-auto mb-3 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          ></path>
+        </svg>
+        <p class="text-gray-600 mb-2">Drag and drop your photo here</p>
+        <p class="text-sm text-gray-500">or click to browse</p>
+        <input
+          id="fileInput"
+          type="file"
+          accept="image/*"
+          class="hidden"
+          onchange={(e) => {
+            const file = e.target!.files[0];
+            if (file) {
+              sidebarNewPhotoFile = file;
+            }
+          }}
+        />
+      </div>
+    {/if}
+
+    <div class="space-y-4">
+      <div class="flex flex-row items-center gap-2">
+        <p>public?</p>
+        <div class="relative inline-block w-11 h-5">
+          <input
+            id="switch-component"
+            type="checkbox"
+            class="peer appearance-none w-11 h-5 bg-slate-400 rounded-full checked:bg-amber-800 cursor-pointer transition-colors duration-300"
+            bind:checked={sidebarNewPhotoPublic}
+          />
+          <label
+            for="switch-component"
+            class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer"
+          >
+          </label>
+        </div>
+      </div>
+      {#if sidebarNewPhotoPublic}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Title
+          </label>
+          <input
+            type="text"
+            bind:value={sidebarNewPhotoTitle}
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter photo title"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Caption
+          </label>
+          <textarea
+            bind:value={sidebarNewPhotoCaption}
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            placeholder="Enter photo caption"
+          ></textarea>
+        </div>
+
+        <!-- Tags Field -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Tags
+          </label>
+          <input
+            type="text"
+            bind:value={sidebarNewPhotoTags}
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g. nature, sunset, landscape"
+          />
+        </div>
+      {/if}
+
+      <!-- Submit Button -->
+      <button
+        class="w-full bg-amber-900 text-amber-200 px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
+        onclick={() => {
+          // need to do two things: upload the file /api/v1/objects then publish the photo /api/v1/photos
+          if (sidebarNewPhotoFile == null) {
+            alert("please select a photo file to upload");
+            return;
+          }
+          const formData = new FormData();
+          formData.append("file", sidebarNewPhotoFile!);
+          formData.append("name", sidebarNewPhotoFile!.name);
+          fetchBackend("/api/v1/objects", {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+          }).then(async (response) => {
+            if (response.ok) {
+              const newObject = await response.json();
+              if (sidebarNewPhotoPublic) {
+                // publish photo
+                const tags = sidebarNewPhotoTags
+                  .split(",")
+                  .map((tag) => tag.trim());
+                const photoResponse = await fetchBackend("/api/v1/photos", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({
+                    title: sidebarNewPhotoTitle,
+                    photo_url: newObject.public_url,
+                    comment: sidebarNewPhotoCaption,
+                    tags: tags,
+                  }),
+                });
+                if (photoResponse.ok) {
+                  const newPhotoID: {
+                    photo_id: number;
+                    metadata: Metadata;
+                  } = await photoResponse.json();
+                  const newPhoto: Photo = {
+                    id: newPhotoID.photo_id,
+                    title: sidebarNewPhotoTitle,
+                    photo_url: newObject.public_url,
+                    comment: sidebarNewPhotoCaption,
+                    metadata: newPhotoID.metadata,
+                    tags: tags.map(
+                      (tagTitle) => ({ title: tagTitle, comment: "" }) as Tag
+                    ),
+                  };
+                  photos =
+                    photos == undefined ? [newPhoto] : [...photos, newPhoto];
+                  showingSidebarNewPhoto = false;
+                  sidebarNewPhotoFile = null;
+                  sidebarNewPhotoTitle = "";
+                  sidebarNewPhotoCaption = "";
+                  sidebarNewPhotoTags = "";
+                } else {
+                  const errorJSON = await photoResponse.json();
+                  alert("error publishing photo: " + errorJSON.error);
+                }
+              } else {
+                // add private photo and close the sidebar
+                privatePhotos =
+                  privatePhotos == undefined
+                    ? [newObject]
+                    : [...privatePhotos, newObject];
+                showingSidebarNewPhoto = false;
+                sidebarNewPhotoFile = null;
+                sidebarNewPhotoTitle = "";
+                sidebarNewPhotoCaption = "";
+                sidebarNewPhotoTags = "";
+              }
+            } else {
+              const errorJSON = await response.json();
+              alert("error uploading photo file: " + errorJSON.error);
+            }
+          });
+        }}
+      >
+        {#if sidebarNewPhotoPublic}
+          publish
+        {:else}
+          upload
+        {/if}
       </button>
     </div>
   </div>

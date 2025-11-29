@@ -43,6 +43,12 @@ type Object struct {
 	Metadata  map[string]string `json:"metadata"`   // metadata associated with the object
 }
 
+func PublicURL(objectKey string) string {
+	pubURL := *env.DefaultEnv.R2_PHOTOS_BUCKET_PUBLIC_URL
+	pubURL.Path = "/" + objectKey
+	return pubURL.String()
+}
+
 func ListAllObjectsInBucket(ctx context.Context, bucketName string) ([]Object, error) {
 	output, err := S3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: &bucketName,
@@ -51,17 +57,15 @@ func ListAllObjectsInBucket(ctx context.Context, bucketName string) ([]Object, e
 		return nil, fmt.Errorf("list objects in bucket: %w", err)
 	}
 	objects := make([]Object, len(output.Contents))
-	pubURL := *env.DefaultEnv.R2_PHOTOS_BUCKET_PUBLIC_URL
 	for i, obj := range output.Contents {
 		md, err := GetObjectMetadata(ctx, bucketName, *obj.Key)
 		if err != nil {
 			return nil, fmt.Errorf("get object metadata for %s: %w", *obj.Key, err)
 		}
-		pubURL.Path = "/" + *obj.Key
 		objects[i] = Object{
 			Name:      *obj.Key,
 			Size:      *obj.Size,
-			PublicURL: pubURL.String(),
+			PublicURL: PublicURL(*obj.Key),
 			Metadata:  md,
 		}
 	}

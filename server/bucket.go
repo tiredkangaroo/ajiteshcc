@@ -59,7 +59,12 @@ func (s *Server) uploadPhotoToBucketHandler() echo.HandlerFunc {
 			slog.Error("put object in bucket", "error", err)
 			return c.JSON(500, map[string]string{"error": "unable to upload file"})
 		}
-		return c.JSON(200, map[string]string{"success": "file uploaded successfully"})
+		return c.JSON(200, bucket.Object{
+			Name:      req.Name,
+			PublicURL: bucket.PublicURL(req.Name),
+			Metadata:  md,
+			Size:      fileheader.Size,
+		})
 	})
 }
 
