@@ -26,7 +26,7 @@ func (s *Server) getNowPlaying(c echo.Context) error {
 	defer func() {
 		s.musicLastUpdated = time.Now() // update last checked time, even on error, to avoid spamming spotify
 	}()
-	if s.spotifyToken == nil || !s.spotifyToken.Valid() || s.spotifyHTTPClient == nil {
+	if s.spotifyHTTPClient == nil {
 		return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "spotify unavailable"})
 	}
 	req, err := http.NewRequest(http.MethodGet, "https://api.spotify.com/v1/me/player/currently-playing", nil)
