@@ -38,4 +38,6 @@ WORKDIR /app
 
 COPY --from=builder /app .
 
+RUN apt-get update && apt-get install -y ca-certificates
+
 ENTRYPOINT ["./app"]
