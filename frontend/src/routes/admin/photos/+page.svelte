@@ -217,7 +217,12 @@
 
     <form
       onsubmit={() => {
-        const tags = sidebarObjectTags.split(",").map((tag) => tag.trim());
+        let tags: string[];
+        if (sidebarObjectTags === "") {
+          tags = [] as string[];
+        } else {
+          tags = sidebarObjectTags.split(",").map((tag) => tag.trim());
+        }
         fetchBackend("/api/v1/photos", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -564,9 +569,14 @@
               const newObject = await response.json();
               if (sidebarNewPhotoPublic) {
                 // publish photo
-                const tags = sidebarNewPhotoTags
-                  .split(",")
-                  .map((tag) => tag.trim());
+                let tags: string[];
+                if (sidebarNewPhotoTags === "") {
+                  tags = [] as string[];
+                } else {
+                  tags = sidebarNewPhotoTags
+                    .split(",")
+                    .map((tag) => tag.trim());
+                }
                 const photoResponse = await fetchBackend("/api/v1/photos", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },

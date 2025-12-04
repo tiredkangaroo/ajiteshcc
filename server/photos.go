@@ -40,10 +40,6 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 		Comment  string   `json:"comment" required:"false"`
 		Tags     []string `json:"tags" required:"false"`
 	}) error {
-		if len(req.Tags) == 0 {
-			req.Tags = nil
-		}
-
 		purl, err := url.Parse(req.PhotoURL)
 		if err != nil {
 			slog.Error("parse photo URL", "error", err)
@@ -86,12 +82,14 @@ func (s *Server) addPhotoHandler() echo.HandlerFunc {
 			slog.Error("add photo", "error", err)
 			return c.String(500, "internal server error")
 		}
-		if err := queries.AddTagsToPhoto(context.Background(), db.AddTagsToPhotoParams{
-			PhotoID: photoID,
-			Column2: req.Tags,
-		}); err != nil {
-			slog.Error("add photo tags", "error", err)
-			return c.String(500, "internal server error")
+		if len(req.Tags) > 0 {
+			if err := queries.AddTagsToPhoto(context.Background(), db.AddTagsToPhotoParams{
+				PhotoID: photoID,
+				Column2: req.Tags,
+			}); err != nil {
+				slog.Error("add photo tags", "error", err)
+				return c.String(500, "internal server error")
+			}
 		}
 
 		if err := tx.Commit(c.Request().Context()); err != nil {

@@ -54,3 +54,9 @@ export interface Object {
   public_url: string;
   metadata: Record<string, string>;
 }
+
+export interface Track {
+  name: string;
+  artists: string;
+  cover_url: string;
+}

@@ -2,6 +2,7 @@ package server
 
 import (
 	"log/slog"
+	"net/http"
 	"slices"
 	"strings"
 	"time"
@@ -11,11 +12,19 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/tiredkangaroo/ajiteshcc/env"
 	"github.com/tiredkangaroo/ajiteshcc/gen/db"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/spotify"
 )
 
 type Server struct {
 	Conn    *pgx.Conn
 	Queries *db.Queries
+
+	spotifyOAuthConfig oauth2.Config // oauth2 config for spotify
+	spotifyHTTPClient  *http.Client
+	spotifyToken       *oauth2.Token // will be nil if not logged in
+	musicLastTrack     *Track
+	musicLastUpdated   time.Time
 }
 
 func (s *Server) Run() error {
@@ -68,6 +77,18 @@ func (s *Server) Run() error {
 	api.GET("/tags", s.listTags)                                    // list all tags (GET /api/v1/tags)
 	api.POST("/tags", s.addTagHandler(), RequireAdminMiddleware)    // add tag (POST /api/v1/tags) - admin only
 	api.DELETE("/tags/:title", s.deleteTag, RequireAdminMiddleware) // delete tag (DELETE /api/v1/tags) - admin only
+
+	// music endpoints (/api/v1/music)
+	s.spotifyOAuthConfig = oauth2.Config{
+		ClientID:     env.DefaultEnv.SPOTIFY_CLIENT_ID,
+		ClientSecret: env.DefaultEnv.SPOTIFY_CLIENT_SECRET,
+		RedirectURL:  env.DefaultEnv.SPOTIFY_REDIRECT_URI,
+		Scopes:       []string{"user-read-playback-state", "user-read-currently-playing"},
+		Endpoint:     spotify.Endpoint,
+	}
+	api.GET("/music", s.getNowPlaying)                                           // get now playing track (GET /api/v1/music)
+	api.GET("/music/login", s.spotifyLoginHandler, RequireAdminMiddleware)       // redirect to spotify oauth login (GET /api/v1/music/login) - admin only
+	api.GET("/music/callback", s.spotifyCallbackHandler, RequireAdminMiddleware) // spotify oauth callback (GET /api/v1/music/callback) - admin only
 
 	// admin endpoints (/api/v1/admin)
 	api.GET("/admin", s.isAdmin)                                                                   // check if admin (GET /api/v1/admin)

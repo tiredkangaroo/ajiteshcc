@@ -1,6 +1,20 @@
-<script>
+<script lang="ts">
   import { isAdmin } from "../lib/stores/isAdmin";
+  import type { Track } from "../types";
   import { fetchBackend } from "../utils";
+
+  let currentTrack: Track | null = $state(null);
+  $effect(() => {
+    async function fetchCurrentTrack() {
+      const res = await fetchBackend("/api/v1/music");
+      if (res.ok) {
+        currentTrack = await res.json();
+      } else {
+        currentTrack = null;
+      }
+    }
+    fetchCurrentTrack();
+  });
 </script>
 
 <div
@@ -9,7 +23,7 @@
   <div class="flex flex-row justify-between items-center w-full max-w-5xl p-6">
     <div class="flex flex-col gap-4 justify-center items-center">
       <h1 class="mt-2 text-4xl font-bold text-amber-900">
-        {$isAdmin ? "hi, aji!" : "Ajitesh Kumar"}
+        {$isAdmin ? "hi, aji!" : "hi, i'm ajitesh!"}
       </h1>
 
       {#if $isAdmin}
@@ -42,4 +56,22 @@
       <h2><a class="hover:underline" href="/blog">blog 📝</a></h2>
     </div>
   </div>
+  {#if currentTrack}
+    <div
+      class="bg-amber-900 text-amber-100 px-8 py-3 rounded-xl flex flex-col gap-3 mt-6"
+    >
+      <p class="text-center">what's aji playing?</p>
+      <div class="flex flex-row items-center gap-9">
+        <img
+          src={currentTrack.cover_url}
+          alt="album cover"
+          class="w-16 h-16 rounded-full animate-[spin_5s_linear_infinite]"
+        />
+        <div class="flex flex-col">
+          <span class="font-semibold text-2xl">{currentTrack.name}</span>
+          <span class="text-sm text-amber-300">{currentTrack.artists}</span>
+        </div>
+      </div>
+    </div>
+  {/if}
 </div>

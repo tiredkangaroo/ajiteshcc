@@ -3,7 +3,7 @@ export function fetchBackend(
   init?: RequestInit
 ): Promise<Response> {
   const backendUrl =
-    import.meta.env.VITE_BACKEND_URL || "https://localhost:8081";
+    import.meta.env.VITE_BACKEND_URL || "https://127.0.0.1:8000";
   if (!init) {
     init = {
       credentials: "include",

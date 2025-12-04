@@ -13,6 +13,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/pquerna/otp v1.5.0
+	golang.org/x/oauth2 v0.33.0
 )
 
 require (

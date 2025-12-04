@@ -37,6 +37,12 @@ type Environment struct {
 	ADDR string
 	// BACKEND_DOMAIN is the domain of the backend server (used for setting cookie domain)
 	BACKEND_DOMAIN string
+	// SPOTIFY_CLIENT_ID is the client ID for Spotify API
+	SPOTIFY_CLIENT_ID string
+	// SPOTIFY_CLIENT_SECRET is the client secret for Spotify API
+	SPOTIFY_CLIENT_SECRET string
+	// SPOTIFY_REDIRECT_URI is the redirect URI for Spotify OAuth
+	SPOTIFY_REDIRECT_URI string
 }
 
 var DefaultEnv Environment
@@ -58,6 +64,9 @@ func init() {
 		CORS_ALLOWED_ORIGINS:        envDefault("CORS_ALLOWED_ORIGINS", "https://ajitesh.cc"),
 		ADDR:                        envRequire("ADDR"),
 		BACKEND_DOMAIN:              envRequire("BACKEND_DOMAIN"),
+		SPOTIFY_CLIENT_ID:           envRequire("SPOTIFY_CLIENT_ID"),
+		SPOTIFY_CLIENT_SECRET:       envRequire("SPOTIFY_CLIENT_SECRET"),
+		SPOTIFY_REDIRECT_URI:        envRequire("SPOTIFY_REDIRECT_URI"),
 	}
 }
 
