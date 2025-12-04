@@ -103,6 +103,7 @@ func (s *Server) spotifyCallbackHandler(c echo.Context) error {
 	}
 	token, err := s.spotifyOAuthConfig.Exchange(c.Request().Context(), code)
 	if err != nil {
+		slog.Error("spotify oauth exchange", "error", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to exchange code for token"})
 	}
 	s.spotifyToken = token
