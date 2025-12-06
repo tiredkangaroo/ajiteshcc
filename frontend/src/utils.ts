@@ -1,9 +1,9 @@
+export const backendUrl =
+  import.meta.env.VITE_BACKEND_URL || "https://127.0.0.1:8000";
 export function fetchBackend(
   url: string,
   init?: RequestInit
 ): Promise<Response> {
-  const backendUrl =
-    import.meta.env.VITE_BACKEND_URL || "https://127.0.0.1:8000";
   if (!init) {
     init = {
       credentials: "include",

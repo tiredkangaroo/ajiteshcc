@@ -20,11 +20,12 @@ type Server struct {
 	Conn    *pgx.Conn
 	Queries *db.Queries
 
-	spotifyOAuthConfig oauth2.Config // oauth2 config for spotify
-	spotifyHTTPClient  *http.Client
-	spotifyToken       *oauth2.Token // will be nil if not logged in
-	musicLastTrack     *Track
-	musicLastUpdated   time.Time
+	spotifyOAuthConfig    oauth2.Config // oauth2 config for spotify
+	spotifyHTTPClient     *http.Client
+	spotifyToken          *oauth2.Token // will be nil if not logged in
+	musicLastUpdated      time.Time
+	musicLastResponseCode int
+	musicLastResponseBody any
 }
 
 func (s *Server) Run() error {
@@ -88,6 +89,7 @@ func (s *Server) Run() error {
 	}
 	api.GET("/music", s.getNowPlaying)                                           // get now playing track (GET /api/v1/music)
 	api.GET("/music/login", s.spotifyLoginHandler, RequireAdminMiddleware)       // redirect to spotify oauth login (GET /api/v1/music/login) - admin only
+	api.GET("/music/logout", s.spotifyLogoutHandler, RequireAdminMiddleware)     // spotify logout (GET /api/v1/music/logout) - admin only
 	api.GET("/music/callback", s.spotifyCallbackHandler, RequireAdminMiddleware) // spotify oauth callback (GET /api/v1/music/callback) - admin only
 
 	// admin endpoints (/api/v1/admin)

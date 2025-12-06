@@ -14,14 +14,6 @@ h2 {
     @apply text-2xl;    
 }
 
-a {
-    @apply text-amber-700 underline;
-}
-
-a:visited {
-    @apply text-amber-800;
-}
-
 button {
     cursor:pointer;
 }

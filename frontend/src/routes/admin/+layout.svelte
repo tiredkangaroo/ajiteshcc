@@ -67,10 +67,11 @@
 {:else}
   <div class="w-full h-full flex justify-center items-center">
     <input
-      type="text"
+      type="tel"
       placeholder="Enter code"
       class="border border-black px-4 py-2"
       bind:value={code}
+      autocomplete="one-time-code"
     />
     <button
       class="ml-4 px-4 py-2 bg-amber-400"

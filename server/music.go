@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -22,33 +23,41 @@ type Track struct {
 func (s *Server) getNowPlaying(c echo.Context) error {
 	// avoid spamming spotify api if we recently checked
 	if time.Since(s.musicLastUpdated) < musicStaleDuration {
-		if s.musicLastTrack == nil {
-			return c.JSON(http.StatusNoContent, map[string]string{"error": "no track currently playing"})
-		}
-		return c.JSON(http.StatusOK, s.musicLastTrack)
+		return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 	}
 	s.musicLastUpdated = time.Now() // update last checked time
 
 	if s.spotifyHTTPClient == nil {
-		return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "spotify unavailable"})
+		s.musicLastResponseCode = http.StatusServiceUnavailable
+		s.musicLastResponseBody = map[string]string{"error": "spotify unavailable"}
+		return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 	}
 	req, err := http.NewRequest(http.MethodGet, "https://api.spotify.com/v1/me/player/currently-playing", nil)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+		slog.Error("create spotify now playing request", "error", err)
+		s.musicLastResponseCode = http.StatusInternalServerError
+		s.musicLastResponseBody = map[string]string{"error": "internal server error"}
+		return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 	}
 	resp, err := s.spotifyHTTPClient.Do(req)
 	if err != nil {
 		slog.Error("spotify now playing request", "error", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+		s.musicLastResponseCode = http.StatusInternalServerError
+		s.musicLastResponseBody = map[string]string{"error": "internal server error"}
+		return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNoContent {
-		return c.JSON(http.StatusNoContent, map[string]string{"error": "no track currently playing"})
+		s.musicLastResponseCode = http.StatusNoContent
+		s.musicLastResponseBody = map[string]string{"error": "no track currently playing"}
+		return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 	}
 	if resp.StatusCode != http.StatusOK {
 		slog.Error("now playing status code", "status_code", resp.StatusCode)
-		return c.JSON(http.StatusBadGateway, map[string]string{"error": "spotify service error"})
+		s.musicLastResponseCode = http.StatusBadGateway
+		s.musicLastResponseBody = map[string]string{"error": "spotify service error"}
+		return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 	}
 
 	var result struct {
@@ -68,11 +77,15 @@ func (s *Server) getNowPlaying(c echo.Context) error {
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		slog.Error("decode spotify now playing response", "error", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+		s.musicLastResponseCode = http.StatusInternalServerError
+		s.musicLastResponseBody = map[string]string{"error": "internal server error"}
+		return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 	}
 
 	if result.Item.Type != "track" {
-		return c.JSON(http.StatusNoContent, map[string]string{"error": "no track currently playing"})
+		s.musicLastResponseCode = http.StatusNoContent
+		s.musicLastResponseBody = map[string]string{"error": "no track currently playing"}
+		return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 	}
 
 	artists := make([]string, len(result.Item.Artists))
@@ -90,13 +103,23 @@ func (s *Server) getNowPlaying(c echo.Context) error {
 		Artists:  strings.Join(artists, ", "),
 		CoverURL: imageURL,
 	}
-	s.musicLastTrack = &track
-	return c.JSON(http.StatusOK, track)
+	s.musicLastResponseCode = http.StatusOK
+	s.musicLastResponseBody = track
+	return c.JSON(s.musicLastResponseCode, s.musicLastResponseBody)
 }
 
 func (s *Server) spotifyLoginHandler(c echo.Context) error {
 	url := s.spotifyOAuthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
 	return c.Redirect(http.StatusFound, url)
+}
+
+func (s *Server) spotifyLogoutHandler(c echo.Context) error {
+	s.spotifyToken = nil
+	s.spotifyHTTPClient = nil
+	s.musicLastUpdated = time.Time{}
+	s.musicLastResponseCode = 0
+	s.musicLastResponseBody = nil
+	return redirectFrontend(c, "/")
 }
 
 func (s *Server) spotifyCallbackHandler(c echo.Context) error {
@@ -110,6 +133,9 @@ func (s *Server) spotifyCallbackHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to exchange code for token"})
 	}
 	s.spotifyToken = token
-	s.spotifyHTTPClient = s.spotifyOAuthConfig.Client(c.Request().Context(), token)
-	return c.JSON(http.StatusOK, map[string]string{"status": "spotify login successful"})
+	s.spotifyHTTPClient = s.spotifyOAuthConfig.Client(context.Background(), token)
+	s.musicLastUpdated = time.Time{}
+	s.musicLastResponseCode = 0
+	s.musicLastResponseBody = nil
+	return redirectFrontend(c, "/")
 }
