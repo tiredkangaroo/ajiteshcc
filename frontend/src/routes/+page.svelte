@@ -83,7 +83,20 @@
         {/if}
       </div>
       <div class="flex flex-row items-center gap-9">
-        <div class="relative w-22 h-22">
+        <div class="relative w-16 h-16">
+          <img
+            src={currentTrack.cover_url}
+            alt="album cover"
+            class="w-full h-full rounded-full animate-[spin_5s_linear_infinite] opacity-90"
+          />
+          <div
+            class="absolute inset-0 rounded-full bg-gradient-conic from-transparent via-white/40 to-transparent animate-[spin_5s_linear_infinite] pointer-events-none"
+          ></div>
+          <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gray-900 border-2 border-gray-700"
+          ></div>
+        </div>
+        <!-- <div class="relative w-22 h-22">
           <div
             class="absolute inset-0 rounded-full bg-[#212121] animate-[spin_5s_linear_infinite]"
           >
@@ -106,7 +119,7 @@
         <div class="flex flex-col">
           <span class="font-semibold text-2xl">{currentTrack.name}</span>
           <span class="text-sm text-amber-300">{currentTrack.artists}</span>
-        </div>
+        </div> -->
       </div>
     </div>
   {:else if getMusicError && $isAdmin}
