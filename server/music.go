@@ -20,32 +20,35 @@ type Track struct {
 }
 
 func (s *Server) getNowPlaying(c echo.Context) error {
-	if time.Since(s.musicLastUpdated) < musicStaleDuration && s.musicLastTrack != nil {
+	// avoid spamming spotify api if we recently checked
+	if time.Since(s.musicLastUpdated) < musicStaleDuration {
+		if s.musicLastTrack == nil {
+			return c.JSON(http.StatusNoContent, map[string]string{"error": "no track currently playing"})
+		}
 		return c.JSON(http.StatusOK, s.musicLastTrack)
 	}
-	defer func() {
-		s.musicLastUpdated = time.Now() // update last checked time, even on error, to avoid spamming spotify
-	}()
+	s.musicLastUpdated = time.Now() // update last checked time
+
 	if s.spotifyHTTPClient == nil {
 		return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "spotify unavailable"})
 	}
 	req, err := http.NewRequest(http.MethodGet, "https://api.spotify.com/v1/me/player/currently-playing", nil)
 	if err != nil {
-		return lastTrackOrError(s.musicLastTrack, c, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 	}
 	resp, err := s.spotifyHTTPClient.Do(req)
 	if err != nil {
 		slog.Error("spotify now playing request", "error", err)
-		return lastTrackOrError(s.musicLastTrack, c, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNoContent {
-		return lastTrackOrError(s.musicLastTrack, c, http.StatusNoContent, map[string]string{"error": "no track currently playing"})
+		return c.JSON(http.StatusNoContent, map[string]string{"error": "no track currently playing"})
 	}
 	if resp.StatusCode != http.StatusOK {
 		slog.Error("now playing status code", "status_code", resp.StatusCode)
-		return lastTrackOrError(s.musicLastTrack, c, http.StatusBadGateway, map[string]string{"error": "spotify service error"})
+		return c.JSON(http.StatusBadGateway, map[string]string{"error": "spotify service error"})
 	}
 
 	var result struct {
@@ -65,11 +68,11 @@ func (s *Server) getNowPlaying(c echo.Context) error {
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		slog.Error("decode spotify now playing response", "error", err)
-		return lastTrackOrError(s.musicLastTrack, c, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 	}
 
 	if result.Item.Type != "track" {
-		return lastTrackOrError(s.musicLastTrack, c, http.StatusNoContent, map[string]string{"error": "no track currently playing"})
+		return c.JSON(http.StatusNoContent, map[string]string{"error": "no track currently playing"})
 	}
 
 	artists := make([]string, len(result.Item.Artists))
@@ -109,13 +112,4 @@ func (s *Server) spotifyCallbackHandler(c echo.Context) error {
 	s.spotifyToken = token
 	s.spotifyHTTPClient = s.spotifyOAuthConfig.Client(c.Request().Context(), token)
 	return c.JSON(http.StatusOK, map[string]string{"status": "spotify login successful"})
-}
-
-// lastTrackOrError either returns the last known track or an error response provided in the
-// code and body parameters.
-func lastTrackOrError(lastTrack *Track, c echo.Context, code int, body map[string]string) error {
-	if lastTrack == nil {
-		return c.JSON(code, body)
-	}
-	return c.JSON(http.StatusOK, lastTrack)
 }
