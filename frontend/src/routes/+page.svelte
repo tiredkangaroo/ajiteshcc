@@ -72,7 +72,7 @@
     <div
       class="bg-amber-900 text-amber-100 px-8 py-3 rounded-xl flex flex-col gap-3 mt-6"
     >
-      <div class="w-full items-center flex flex-row gap-2">
+      <div class="w-full items-center flex flex-row gap-2 justify-center">
         <p class="text-center">what's aji playing?</p>
         {#if $isAdmin}
           <p class="text-center text-sm">
@@ -96,30 +96,12 @@
             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gray-900 border-2 border-gray-700"
           ></div>
         </div>
-        <!-- <div class="relative w-22 h-22">
-          <div
-            class="absolute inset-0 rounded-full bg-[#212121] animate-[spin_5s_linear_infinite]"
-          >
-            <div
-              class="absolute inset-0 rounded-full"
-              style={"background: repeating-radial-gradient(circle at center, transparent 0px, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)"}
-            ></div>
-          </div>
-
-          <img
-            src={currentTrack.cover_url}
-            alt="album cover"
-            class="absolute inset-0 w-12 h-12 m-auto rounded-full animate-[spin_5s_linear_infinite]"
-          />
-
-          <div
-            class="absolute inset-0 w-2 h-2 m-auto rounded-full bg-amber-900 border border-black animate-[spin_5s_linear_infinite]"
-          ></div>
-        </div>
         <div class="flex flex-col">
-          <span class="font-semibold text-2xl">{currentTrack.name}</span>
-          <span class="text-sm text-amber-300">{currentTrack.artists}</span>
-        </div> -->
+          <p class="text-lg font-semibold text-amber-100">
+            {currentTrack.name}
+          </p>
+          <p class="text-xs text-amber-200">{currentTrack.artists}</p>
+        </div>
       </div>
     </div>
   {:else if getMusicError && $isAdmin}
